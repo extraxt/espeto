@@ -111,6 +111,18 @@
     document.documentElement.appendChild(hospedeiro);
   };
 
+  /* Esconder o HOSPEDEIRO, e nao cada peca por dentro. Esvaziar o painel nao
+   * o apaga: borda, fundo, padding e sombra sao dele, entao sem conteudo
+   * sobra uma caixinha vazia no canto. Apagar a arvore inteira de uma vez
+   * tambem garante que nenhum estado parcial - realce sem rotulo, rotulo sem
+   * painel - consiga vazar para a tela.
+   *
+   * `setProperty` com `important` porque o cssText do hospedeiro declara
+   * `display: block !important` para se defender do CSS da pagina; sem a
+   * mesma prioridade, a atribuicao simples perderia para ele. */
+  const mostrarCasca = (v) =>
+    hospedeiro.style.setProperty('display', v ? 'block' : 'none', 'important');
+
   // ------------------------------------------------------- montar a pilha
 
   const shadowDe = (el) => {
@@ -330,6 +342,7 @@
 
   const desenhar = (aviso) => {
     montarCasca();
+    mostrarCasca(true);
     if (!pilha.length) {
       realce.style.display = rotulo.style.display = 'none';
       painel.replaceChildren(rodape('nada sob o cursor'));
@@ -410,6 +423,7 @@
 
   const apagar = () => {
     if (!raiz) return;
+    mostrarCasca(false);
     realce.style.display = rotulo.style.display = 'none';
     painel.replaceChildren();
   };
@@ -638,8 +652,15 @@
 
   // ------------------------------------------------------------ eventos
 
+  /* Contador de sessao. O desligamento depois de uma acao e adiado em ~1s
+   * para dar tempo de ler o aviso no painel, e nesse intervalo o usuario pode
+   * ter saido no Esc e ligado de novo - o timer atrasado apagaria a sessao
+   * NOVA. Comparar a geracao faz o timer velho virar no-op. */
+  let geracao = 0;
+
   const ligar = (v) => {
     if (ativo === v) return;
+    geracao++;
     ativo = v;
     escolhido = null;
     travado = false;
@@ -730,7 +751,10 @@
       if (!msg) return;
       escolhido = alvo;
       desenhar(msg);
-      if (!/falhou|nao ha|nao tem|primeiro/.test(msg)) setTimeout(() => ligar(false), 900);
+      const minha = geracao;
+      if (!/falhou|nao ha|nao tem|primeiro/.test(msg)) {
+        setTimeout(() => { if (geracao === minha) ligar(false); }, 900);
+      }
     } catch (err) {
       desenhar(`falhou: ${err.message}`);
     }
