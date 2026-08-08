@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Espeto",
+  "version": "1.0.0",
+  "description": "Atravessa a pilha de divs sob o cursor e deixa voce escolher a camada. Roda do mouse anda pelas camadas, uma tecla copia a URL, baixa o arquivo ou manda o no para o Elements.",
+  "permissions": ["downloads", "clipboardWrite"],
+  "background": {
+    "service_worker": "sw.js"
+  },
+  "devtools_page": "devtools.html",
+  "action": {
+    "default_title": "Espeto - espetar a pilha sob o cursor (Alt+Shift+E)"
+  },
+  "commands": {
+    "espetar": {
+      "suggested_key": {
+        "default": "Alt+Shift+E"
+      },
+      "description": "Espetar a pilha de elementos sob o cursor"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["espeto.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ]
+}
