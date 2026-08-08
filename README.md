@@ -149,6 +149,13 @@ do que mirar em item de lista, então não é bem um preço.
 o lightbox da página, o layout muda, e a pilha que você escolheu deixa de
 existir no mesmo instante. `Shift+roda` continua rolando a página.
 
+**Mas só clique de gente**, filtrado por `e.isTrusted`. O `b` baixa criando um
+`<a download>` e clicando nele por código — e clique por código também passa
+pelo engolidor. Sem o filtro, o Espeto cancelava o próprio download com o
+`preventDefault`, sem erro nenhum: só o arquivo que nunca aparecia. A regra
+certa é essa mesma, aliás — o que se quer engolir é a reação da **página** ao
+clique do usuário, e clique sintético não vem do usuário.
+
 **A pilha trava quando você anda nela.** Depois de girar a roda, um tremor de
 12px no mouse não refaz a lista — senão a camada escolhida escaparia no
 microssegundo entre decidir e apertar.

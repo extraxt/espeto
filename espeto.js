@@ -549,7 +549,7 @@
     a.href = u;
     a.download = nome;
     a.style.display = 'none';
-    document.body.appendChild(a);
+    (document.body || document.documentElement).appendChild(a);
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(u), 30000);
@@ -682,6 +682,16 @@
 
   const engolir = (e) => {
     if (!ativo) return;
+    /* So clique de gente. `e.isTrusted` e false em qualquer evento disparado
+     * por codigo - inclusive o `a.click()` que o proprio `salvarBlob` usa
+     * para baixar. Sem esta linha o Espeto cancelava o proprio download: o
+     * `preventDefault` daqui mata a acao padrao do <a download> e nao sobra
+     * erro nenhum, so o arquivo que nunca aparece.
+     *
+     * Filtrar aqui, e nao marcar o clique com uma flag, porque a regra certa
+     * e essa mesma: o que se quer engolir e a reacao da PAGINA ao clique do
+     * usuario, e clique sintetico nao vem do usuario. */
+    if (!e.isTrusted) return;
     e.preventDefault();
     e.stopPropagation();
     if (e.type === 'click' || e.type === 'contextmenu') confirmar();
